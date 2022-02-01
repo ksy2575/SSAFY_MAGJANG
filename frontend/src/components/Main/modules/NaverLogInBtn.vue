@@ -1,32 +1,25 @@
 <template>
-  <div class="naver-login">
-    <a href="/redirect?accesstoken=true&refreshtoken=true">
-      <img 
-        src="src/assets/naver_login.png"
-        alt="login" />
-    </a>
+  <div
+    class="text-center"
+    id="naver_id_login">
   </div>
 </template>
 
 <script>
 export default {
-
-// /api/naverloginrequest
-
-  methods: {
+  mounted() {
+    const naver_id_login = new window.naver_id_login("XcnVRW5TXoLW3FDEkiUJ", "http://localhost:8083/navercallback");
+    const state = naver_id_login.getUniqState();
+    naver_id_login.setButton("green", 3, 80)
+    naver_id_login.setState(state);
+    // naver_id_login.setPopup();
+    naver_id_login.init_naver_id_login();
   }
 }
 </script>
 
 <style scoped>
-  .naver-login {
-    position: relative;
-    display: block;
-    cursor: pointer;
-    transition: all 0.2s linear;
-    text-align: center;
-  }
-  .naver-login:hover {
+  #naver_id_login:hover {
     transform: scale(1.05);
   }
 </style>

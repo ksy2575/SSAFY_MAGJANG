@@ -1,6 +1,6 @@
 import { createWebHistory, createRouter } from "vue-router";
 import Home from "@/views/Main/Home.vue";
-import redirect from "@/views/Main/redirect.vue";
+import NaverCallback from "@/views/Main/NaverCallback.vue";
 import GameView from "@/views/GameMain/GameView.vue";
 
 const routes = [
@@ -10,9 +10,9 @@ const routes = [
     component: Home,
   },
   {
-    path: '/redirect',
-    name: 'redirect',
-    component: redirect
+    path: '/navercallback',
+    name: 'NaverCallback',
+    component: NaverCallback
   },
   {
     path: '/game',

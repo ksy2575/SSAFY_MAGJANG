@@ -22,8 +22,7 @@ export default {
 <style scoped>
 
 .mj-btn {
-  position: relative;
-  width: 250px;
+  width: 30vw;
   padding: 10px;
   border: 2px solid #333;
   border-radius: 4px;
@@ -36,7 +35,7 @@ export default {
   display: block;
   transition: .4s;
   margin: 0 auto;
-  margin-top: 40px;
+  margin-top: 20px;
   background-color: #333;
   color: #fff;
 
