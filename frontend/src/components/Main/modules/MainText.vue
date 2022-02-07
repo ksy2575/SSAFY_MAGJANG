@@ -19,12 +19,11 @@ export default {
 
 <style scoped>
   span {
-    position: relative;
     display: block;
     font-size: 20px;
     font-weight: 700;
     color: #fff;
-    margin-bottom: 60px;
+    margin-bottom: 20px;
     text-align: center;
   }
 </style>

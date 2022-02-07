@@ -1,13 +1,14 @@
 <template>
-  <div
-    class="mj-input-group input-group-lg"
-    @keyup.enter="member">
+  <div class="mj-input-group input-group-lg">
     <input
       type="text"
       class="form-control"
       aria-label="Sizing example input"
       aria-describedby="inputGroup-sizing-lg"
-      :placeholder="placeText" />
+      :placeholder="placeText"
+      @keypress.enter="$emit('enter')"
+      @keyup="$emit('child-input-change', inputText)"
+      @input="inputText = $event.target.value" />
   </div>
 </template>
 
@@ -19,6 +20,12 @@ export default {
       default: "default"
     },
   },
+  data() {
+    return {
+      inputText: "",
+    }
+  },
+  emits: ['child-input-change', 'enter'],
 }
 </script>
 

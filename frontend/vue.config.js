@@ -10,7 +10,7 @@ module.exports = {
     port: 8083,
     open: true,
     proxy: {
-      '/api': {
+      '/account': {
         target: 'http://localhost:8080/'
       }
     },

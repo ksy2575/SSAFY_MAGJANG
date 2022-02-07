@@ -26,9 +26,6 @@ export default {
 </script>
 
 <style scoped>
-  .main {
-    position: relative;
-  }
   .main .logo {
     text-align: center;
   }

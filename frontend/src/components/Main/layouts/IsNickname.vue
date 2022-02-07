@@ -1,5 +1,5 @@
 <template>
-  <div v-if="nickname">
+  <div v-if="nickName">
     <GameRoom />
   </div>
   <div v-else>
@@ -21,7 +21,7 @@ export default {
 
   computed: {
     ...mapGetters([
-      'nickname',
+      'nickName',
     ])
   },
 

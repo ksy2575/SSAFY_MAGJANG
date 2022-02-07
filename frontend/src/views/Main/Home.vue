@@ -33,12 +33,18 @@ export default {
     background-color: #1f1f1f;
   }
  #main {
+<<<<<<< HEAD:frontend/src/views/Main/Home.vue
    position: relative;
    height: 100vh;
+=======
+   height: 100vh;
+   max-height: 100vh;
+>>>>>>> FE-game-main:src/views/Main/Home.vue
    background-image: url('/src/assets/money_bg1.jpg');
    background-repeat: no-repeat;
    background-size: 100%; 
    background-attachment: fixed;
+<<<<<<< HEAD:frontend/src/views/Main/Home.vue
 
  } 
    #main::before {
@@ -50,6 +56,10 @@ export default {
     right: 0;
     bottom: 0;
     background-color: #000;
+=======
+   background-blend-mode: overlay;
+   background-color: rgba(0, 0, 0, 0.5);
+>>>>>>> FE-game-main:src/views/Main/Home.vue
  }
 
 </style>
