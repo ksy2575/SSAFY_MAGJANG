@@ -27,17 +27,12 @@ export default {
 
 
 <style>
-  :root {
-    height: 100%;
-    overflow: hidden;
-    background-color: #1f1f1f;
-  }
  #main {
    height: 100vh;
    max-height: 100vh;
    background-image: url('/src/assets/money_bg1.jpg');
    background-repeat: no-repeat;
-   background-size: 100%; 
+   background-size: cover; 
    background-attachment: fixed;
    background-blend-mode: overlay;
    background-color: rgba(0, 0, 0, 0.5);

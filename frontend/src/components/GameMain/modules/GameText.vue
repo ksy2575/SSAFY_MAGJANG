@@ -16,8 +16,8 @@ export default {
 .text {
   display: flex;
   color: black;
-  font-size: 20px;
-  margin-left: 30px;
+  font-size: 1.5em;
+  margin-left: 1.875rem;
   align-items: center;
 }
 </style>

@@ -18,11 +18,11 @@
     <button
       type="button"
       class="btn mj-btn"
-      @click=" this.$router.push({ name: 'Home' })">
+      @click="[leaveSession(), goBack()]">
       메인화면으로
     </button>
   </div>
-  <div></div>
+  <!---->
 </template>
 
 <script>
@@ -38,6 +38,13 @@ export default {
   methods: {
     gamePossible(){
       this.$emit('game-possible')
+    },
+    goBack() {
+      this.$router.push({ name: 'Game' })
+      console.log('goBack')
+    },
+    leaveSession() {
+      this.$emit('leave-session')
     }
   }
 }

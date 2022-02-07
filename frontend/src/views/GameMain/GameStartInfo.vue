@@ -20,16 +20,13 @@
     <!-- 설명 -->
     <div
       class="col">
-      <div class="row">
-        <div class="col">
-          <GameText />
-        </div>
-        <div class="col">
-          <!-- <GameTimer /> -->
-          <BaseTimer
-            :time-left="timeLeft" />
-        </div>
-      </div>
+      <GameText />
+    </div>
+  
+    <!-- 타이머 -->
+    <div class="col timer">
+      <BaseTimer
+        :time-left="timeLeft" />
     </div>
   </div>
 </template>
@@ -81,7 +78,7 @@ export default {
       this.timerInterval = setInterval(() => (this.timePassed += 1), 1000);
     },
     skipTimer() {
-      this.timeLimit = 10,
+      this.timeLimit = 30,
       this.timePassed = 0,
       clearInterval(this.timerInterval);
       this.timerInterval = null;

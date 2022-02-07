@@ -111,8 +111,9 @@ export default {
 /* Sets the containers height and width */
 .base-timer {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 6.25rem;
+  height: 6.25rem;
+  left: 6.25rem;
 	
 /* Removes SVG styling that would hide the time label */
   &__circle {

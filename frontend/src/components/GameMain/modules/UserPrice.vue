@@ -16,7 +16,7 @@
 export default {
   data() {
     return {
-      price : 5000,
+      price : 7000,
     };
   },
 }

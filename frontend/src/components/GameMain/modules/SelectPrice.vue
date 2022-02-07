@@ -5,9 +5,7 @@
       class="price"
       type="text"
       dir="rtl"
-      placeholder="Price"
-      v-model="price"
-      readonly />
+      placeholder="Price" />
     <b> 만원</b>
   </span>
 </template>
@@ -16,21 +14,27 @@
 export default {
   data() {
     return {
-      price : 5000,
+      price : '',
     };
   },
+  methods: {
+    inputPrice(event) {
+      this.price = event.target.value;
+      console(event)
+    }
+  }
 }
 </script>
 
 <style scoped>
 .price-box {
     /* border: 1px solid black;*/
-    width: 200px;
+    width: 70%;
 }
 .price-box .price {
     font-size: 2rem;
     color : white;
-    border : none;
+    border : 3px solid red;
     background-color: #1f1f1f;
 }
 .price-box b {

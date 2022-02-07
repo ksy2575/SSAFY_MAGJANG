@@ -5,37 +5,33 @@
       <div class="nav-top">
         <GameRuleInfo />
         <div v-if="gamePossible">
-          <InputPrice />
+          <UserPrice />
         </div>
       </div>
       <div class="video-container">
         <div
           id="join"
           v-if="!session">
-          <div id="img-div">
-            <img src="resources/images/openvidu_grey_bg_transp_cropped.png" />
-          </div>
           <div
             id="join-dialog"
             class="jumbotron vertical-center">
-            <h1>Join a video session</h1>
             <div class="form-group">
-              <p>
-                <label>Participant</label>
-                <input
-                  v-model="myUserName"
-                  class="form-control"
-                  type="text"
-                  required />
-              </p>
-              <p>
-                <label>Session</label>
-                <input
-                  v-model="mySessionId"
-                  class="form-control"
-                  type="text"
-                  required />
-              </p>
+              <h1 style="color: white;">
+                닉네임을 입력하세요
+              </h1>
+              <input
+                v-model="myUserName"
+                class="form-control"
+                type="text"
+                required />
+              <h1 style="color: white;">
+                방코드를 입력하세요
+              </h1>
+              <input
+                v-model="mySessionId"
+                class="form-control"
+                type="text"
+                required />
               <p class="text-center">
                 <button
                   class="btn btn-lg btn-success"
@@ -55,10 +51,14 @@
             <!-- user-video1 -->
             <div class="row user-video1 row-cols-3 g-2 g-lg-3">
               <div class="col">
+                <!-- check! -->
                 <div class="p-3 bg-light">
                   <user-video
-                    :stream-manager="publisher"
-                    @click="updateMainVideoStreamManager(publisher)" />
+                    :stream-manager="publisher" 
+                    @click="SelectPriceShow" />
+                  <div v-if="selected">
+                    <SelectPrice />
+                  </div>
                   <UserAbility />
                 </div>
               </div>
@@ -72,16 +72,14 @@
                     :stream-manager="sub"
                     @click="updateMainVideoStreamManager(sub)" /> -->
                   <user-video
-                    :stream-manager="this.subscribers[3]"
-                    @click="updateMainVideoStreamManager(sub)" />
+                    :stream-manager="this.subscribers[3]" />
                   <UserAbility />
                 </div>
               </div>
               <div class="col">
                 <div class="p-3 bg-light">
                   <user-video
-                    :stream-manager="this.subscribers[0]"
-                    @click="updateMainVideoStreamManager(sub)" />
+                    :stream-manager="this.subscribers[0]" />
                   <UserAbility />
                 </div>
               </div>
@@ -95,7 +93,8 @@
                 <div v-else>
                   <!-- gamePossible=false일 때 대기화면 -->
                   <GameWatingBtns 
-                    @gamePossible="gamestart" />
+                    @gamePossible="gamestart"
+                    @leaveSession="leaveSession()" />
                 </div>
               </div>
             </div>
@@ -105,24 +104,21 @@
                 class="col">
                 <div class="p-3 bg-light first">
                   <user-video
-                    :stream-manager="this.subscribers[1]"
-                    @click="updateMainVideoStreamManager(sub)" />
+                    :stream-manager="this.subscribers[1]" />
                   <UserAbility />
                 </div>
               </div>
               <div class="col">
                 <div class="p-3 bg-light">
                   <user-video
-                    :stream-manager="this.subscribers[4]"
-                    @click="updateMainVideoStreamManager(sub)" />
+                    :stream-manager="this.subscribers[4]" />
                   <UserAbility />
                 </div>
               </div>
               <div class="col">
                 <div class="p-3 bg-light">
                   <user-video
-                    :stream-manager="this.subscribers[2]"
-                    @click="updateMainVideoStreamManager(sub)" />
+                    :stream-manager="this.subscribers[2]" />
                   <UserAbility />
                 </div>
               </div>
@@ -147,15 +143,16 @@
 </template>
 
 <script>
-import InputPrice from '@/components/GameMain/modules/InputPrice.vue'
+import UserPrice from '@/components/GameMain/modules/UserPrice.vue'
 import GameWatingBtns from '@/components/GameMain/modules/GameWatingBtns.vue'
 import GameStartInfo from './GameStartInfo.vue'
 import GameRuleInfo from '@/components/GameMain/modules/GameRuleInfo.vue'
 import UserAbility from '@/components/GameMain/modules/UserAbility.vue'
+import SelectPrice from '@/components/GameMain/modules/SelectPrice.vue'
 
 import axios from 'axios';
 import { OpenVidu } from 'openvidu-browser';
-import UserVideo from '@/components/camera/UserVideo'; 
+import UserVideo from '@/components/GameMain/layouts/UserVideo'; 
 
 
 axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -168,30 +165,40 @@ export default {
   components: {
     GameWatingBtns,
     GameStartInfo,
-    InputPrice,
+    UserPrice,
     GameRuleInfo,
     UserVideo,
     UserAbility,
+    SelectPrice,
   },
 
   data(){
     return{
       gamePossible: false,
+      selected: false,
+
+      // openVidu data
       OV: undefined,
 			session: undefined,
 			mainStreamManager: undefined,
 			publisher: undefined,
 			subscribers: [],
-
       mySessionId: 'SessionA',
 			myUserName: 'Participant' + Math.floor(Math.random() * 100),
+    
+      // remove List
+      removeList: [],
+
     }
   },
   methods: {
     gamestart() {
-      this.gamePossible=true
+      this.gamePossible=true;
     },
-
+    SelectPriceShow() {
+      this.selected = !this.selected;
+    },
+    //// 오픈비두 ////
     joinSession() {
       // --- Get an OpenVidu object ---
 			this.OV = new OpenVidu();
@@ -201,11 +208,14 @@ export default {
 
       // --- Specify the actions when events take place in the session ---
 
-      // On every new Stream received...
+      // 새로운 player 입장
 			this.session.on('streamCreated', ({ stream }) => {
 				const subscriber = this.session.subscribe(stream);
 				this.subscribers.push(subscriber);
 			});
+      console.log(this.session)
+      console.log('HI')
+      console.log(this.subscribers)
 
       // On every Stream destroyed...
 			this.session.on('streamDestroyed', ({ stream }) => {
@@ -213,6 +223,7 @@ export default {
 				if (index >= 0) {
 					this.subscribers.splice(index, 1);
 				}
+        this.removeList.push(index);
 			});
 
       // On every asynchronous exception...
@@ -256,28 +267,29 @@ export default {
 			window.addEventListener('beforeunload', this.leaveSession)
 		},
 
+    leaveSession () {
+      // --- Leave the session by calling 'disconnect' method over the Session object ---
+      if (this.session) this.session.disconnect();
+
+      this.session = undefined;
+      this.mainStreamManager = undefined;
+      this.publisher = undefined;
+      this.subscribers = [];
+      this.OV = undefined;
+
+      window.removeEventListener('beforeunload', this.leaveSession);
+		},
+
     updateMainVideoStreamManager (stream) {
 			if (this.mainStreamManager === stream) return;
 			this.mainStreamManager = stream;
 		},
 
-		/**
-		 * --------------------------
-		 * SERVER-SIDE RESPONSIBILITY
-		 * --------------------------
-		 * These methods retrieve the mandatory user token from OpenVidu Server.
-		 * This behavior MUST BE IN YOUR SERVER-SIDE IN PRODUCTION (by using
-		 * the API REST, openvidu-java-client or openvidu-node-client):
-		 *   1) Initialize a Session in OpenVidu Server	(POST /openvidu/api/sessions)
-		 *   2) Create a Connection in OpenVidu Server (POST /openvidu/api/sessions/<SESSION_ID>/connection)
-		 *   3) The Connection.token must be consumed in Session.connect() method
-		 */
 
 		getToken (mySessionId) {
 			return this.createSession(mySessionId).then(sessionId => this.createToken(sessionId));
 		},
 
-		// See https://docs.openvidu.io/en/stable/reference-docs/REST-API/#post-session
 		createSession (sessionId) {
 			return new Promise((resolve, reject) => {
 				axios
@@ -305,7 +317,6 @@ export default {
 			});
 		},
 
-		// See https://docs.openvidu.io/en/stable/reference-docs/REST-API/#post-connection
 		createToken (sessionId) {
 			return new Promise((resolve, reject) => {
 				axios
