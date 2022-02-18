@@ -5,51 +5,52 @@
       <GameEndTable/>
     </div>
     <!-- Game 진행중 일 때 화면  -->
-    <div 
-      v-else
-      class="col-4 first-area">
-      <div> 
-        <span class="badge bg-light">거래 조건</span> <br />
-        <span>브로커 포함 {{ dealLimitPeople }}명 이상</span>
-        <div id="abilities">
-          <div
-            v-for="deal in dealCondition"
-            :key="deal.id">
-            <Abilities
-              class="table-ability"
-              :ability="deal"
-              :activate="!dealStateCount[deal]" />
+    <div v-else>
+      <div 
+        class="col-4 first-area">
+        <div> 
+          <span class="badge bg-light">거래 조건</span> <br />
+          <span>브로커 포함 {{ dealLimitPeople }}명 이상</span>
+          <div id="abilities">
+            <div
+              v-for="deal in dealCondition"
+              :key="deal.id">
+              <Abilities
+                class="table-ability"
+                :ability="deal"
+                :activate="!dealStateCount[deal]" />
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- 거래 금액 -->
-    <div class="col-3 total-money">
-      <span class="badge bg-light">거래 금액</span> <br />
-      <img
-        src="@/assets/money.png"
-        alt="money.png" />
-      <div> {{ turnPrice }} 만원</div>
-    </div>
-          
-    <!-- 설명 -->
-    <div
-      class="col-5">
-      <div class="row">
-        <div
-          v-if="broker && !isDealClicked"
-          class="col table-text-col">
-          <GameText />
-        </div>
-        <div
-          v-else
-          class="col">
-          <SelectedUserBtn />
-        </div>
-        <div class="col">
-          <GameTimer
-            :time-left="timeLeft" />
+      <!-- 거래 금액 -->
+      <div class="col-3 total-money">
+        <span class="badge bg-light">거래 금액</span> <br />
+        <img
+          src="@/assets/money.png"
+          alt="money.png" />
+        <div> {{ turnPrice }} 만원</div>
+      </div>
+            
+      <!-- 설명 -->
+      <div
+        class="col-5">
+        <div class="row">
+          <div
+            v-if="broker && !isDealClicked"
+            class="col table-text-col">
+            <GameText />
+          </div>
+          <div
+            v-else
+            class="col">
+            <SelectedUserBtn />
+          </div>
+          <div class="col">
+            <GameTimer
+              :time-left="timeLeft" />
+          </div>
         </div>
       </div>
     </div>
