@@ -76,7 +76,6 @@ export default {
 </script>
 
 <style scoped>
-/* height 45로 바꾸기 */
 .game-play-log {
   font-size: 16px;
   width: 100%;

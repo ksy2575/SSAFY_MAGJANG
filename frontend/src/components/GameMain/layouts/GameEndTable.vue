@@ -229,8 +229,8 @@
 
     <button
       type="button"
-      class="btn mj-btn-reverse"
-      @click=" this.$router.push({ name: 'Home' })">
+      class="btn mj-btn"
+      @click="clickMain">
       메인화면으로
     </button>
   </div>
@@ -273,8 +273,13 @@ export default {
       this.winner = finalrank[0].nickName;
       for (var i = 0; i < finalrank.length; i++) {
 
-        this.gameRank.push([i, finalrank[i].nickName], finalrank[i].money);
+        this.gameRank.push([i, finalrank[i].nickName, finalrank[i].money]);
       }
+    },
+    clickMain() {
+      // check
+      this.emitter.emit('chat_disconnect');
+       this.$router.push({ name: 'Home' })
     },
   }
 }
@@ -301,10 +306,5 @@ export default {
   width: 200px;
   margin-top: 10px;
   display: inline-block;
-}
-
-.mj-btn-reverse {
-  width: 200px;
-  margin-top: 10px;
 }
 </style>
