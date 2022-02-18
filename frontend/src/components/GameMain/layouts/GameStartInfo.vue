@@ -1,6 +1,13 @@
 <template>
   <div class="row">
-    <div class="col-4 first-area">
+    <!-- Game Finished 됬을 때  -->
+    <div v-if="gameFinished">
+      <GameEndTable/>
+    </div>
+    <!-- Game 진행중 일 때 화면  -->
+    <div 
+      v-else
+      class="col-4 first-area">
       <div> 
         <span class="badge bg-light">거래 조건</span> <br />
         <span>브로커 포함 {{ dealLimitPeople }}명 이상</span>
@@ -54,6 +61,7 @@ import GameTimer from '@/components/GameMain/modules/GameTimer'
 import GameText from '@/components/GameMain/modules/GameText.vue'
 import SelectedUserBtn from '@/components/GameMain/layouts/SelectedUserBtn.vue'
 import Abilities from '@/components/GameMain/modules/Abilities.vue'
+import GameEndTable from '@/components/GameMain/layouts/GameEndTable.vue'
 import { mapGetters } from 'vuex'
 
 export default {
@@ -64,6 +72,7 @@ export default {
     SelectedUserBtn,
     Abilities,
     // GameRoundInfo,
+    GameEndTable,
   },
   data() {
     return {
@@ -100,6 +109,7 @@ export default {
       "conclusion",
       "broker",
       "voter",
+      "gameFinished",
     ]),
   },
   methods: {

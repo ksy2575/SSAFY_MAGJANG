@@ -38,6 +38,8 @@ export default createStore({
 
     isVoteClicked: false,
     isDealClicked: false,
+
+    gameFinished: false,
   },
   getters: {
     // state 상태 가져오기
@@ -66,6 +68,7 @@ export default createStore({
     dealLimitPeople: state => state.dealLimitPeople,
     isVoteClicked: state => state.isVoteClicked,
     isDealClicked: state => state.isDealClicked,
+    gameFinished: state => state.gameFinished,
 
     isLogined: function (state) {
       return state.userId && state.naverId;
@@ -184,10 +187,9 @@ export default createStore({
       state.userNickName[index] = NickName
       // console.log(state.userNickName)
     },
-    // SET_PLAYER_JOB(state, jsonJob) {
-    //   state.userNickName[index] = NickName
-    //   // console.log(state.userNickName)
-    // }
+    SET_GAME_FINISHED(state, flag) {
+      state.gameFinished = flag
+    },
   },
   actions: {
     // mutations 호출, 비동기 가능
@@ -259,6 +261,9 @@ export default createStore({
     },
     setIsDealClicked({commit}, flag) {
       commit("SET_IS_DEAL_CLICKED", flag)
+    },
+    setGameFinished({commit}, flag) {
+      commit("SET_GAME_FINISHED", flag)
     },
   },
   modules: {},

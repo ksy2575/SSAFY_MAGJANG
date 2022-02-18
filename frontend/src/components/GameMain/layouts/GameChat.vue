@@ -120,7 +120,7 @@ export default {
     objDiv.scrollTo({ top: objDiv.scrollHeight, behavior: "smooth" });
   },
   methods: {
-    ...mapActions(["setPlayerJob", "setUserOrder","setBroker","setVoter","setConclusion","setMyMoney", "setDealConditions",]),
+    ...mapActions(["setPlayerJob", "setUserOrder","setBroker","setVoter","setConclusion","setMyMoney", "setDealConditions", "setGameFinished"]),
     setMyMoneys(mymoney){
       this.setMyMoney(mymoney);
     },
@@ -346,7 +346,7 @@ export default {
             var orderString = "";
             console.log("첫째 순번 : " + order[0]);
             orderString += "현재 라운드의 순서는 ";
-            var imoji = ["1️⃣","2️⃣","3️⃣","4️⃣"];
+            var imoji = ["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣"];
             for (var i = 0; i < order.length; i++) {
               console.log(order[i]);
               // 1. res.body 확인 후 게임 로그에 "{round} 라운드의 순서입니다. ~~" 등 출력
@@ -394,7 +394,7 @@ export default {
             // console.log("필요 인원수 : " + deal.playerCount);
             // console.log("필요 능력 : " + deal.chosenJobs);
             
-            this.emitter.emit('startTimer', 45);
+            this.emitter.emit('startTimer', 60);
             this.setDealConditions(deal)
             // this.recvList.push(JSON.parse(res.body));
             // 게임 조건입니다.
@@ -451,7 +451,7 @@ export default {
               dealLogString += "으로 참여합니다.💸💸💸"
               console.log(dealLogString);
               this.emitter.emit('logDealState', dealLogString);
-              this.emitter.emit('startTimer', 15);//여기까진 확인
+              this.emitter.emit('startTimer', 30);//여기까진 확인
             }
           });
 
@@ -522,13 +522,13 @@ export default {
             var rank = JSON.parse(res.body);
             console.log("라운드 순위 반환 : ", rank);
             console.log("현재 1등! : " + rank[0]);
-            this.emitter.emit('logRoundWin', '현재 가장 갑부는' + rank[0]+ '입니다.')
+            this.emitter.emit('logRoundWin', '현재 갑부는' + rank[0]+ '입니다.')
             
             
             // 위에서 1등 정의, 나머지 순서 게임 로그에 반환
             for (var i = 1; i < rank.length; i++) {
               console.log(rank[i]);
-              this.emitter.emit('logRoundRank', '현재 '+ (i + 1) +'번째 갑부는' + rank[i] + '입니다.')
+              this.emitter.emit('logRoundRank', '현재 '+ (i + 1) +'번째 자산가는' + rank[i] + '입니다.')
             }
 
             this.emitter.emit('stopTimer', 100);
@@ -586,7 +586,8 @@ export default {
               this.emitter.emit('FinalGamePlayers', log);
             }
 
-            // this.recvList.push(JSON.parse(res.body));
+            // ==================여기서 GameFinished 변경====================
+            this.setGameFinished(true)
           });
 
           // 처음 연결 시 접속 메세지 전송

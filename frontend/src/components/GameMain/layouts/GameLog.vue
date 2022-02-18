@@ -7,7 +7,7 @@
       class="log-item"
       v-for="(item, idx) in proList"
       :key="idx">
-      {{ item }}
+      {{ item }} <br>
     </div>      
   </div>
 </template>
