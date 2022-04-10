@@ -3,6 +3,7 @@ package B208.mag_jang.service;
 import B208.mag_jang.domain.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -18,33 +19,26 @@ public class GameService {
 
     private final RoomMap roomMap;
     private final GameMap gameMap;
-    private final AsyncService asyncService;
 
-    // GameDTO 생성 후 GameMap<String roomId, GameDTO gameDTO>에 연결 - ㅇ
-    // roomMap의 key 삭제 - ㅇ
-    public boolean gameStart(String writer, String roomId) {
-        if(roomMap.getNicknames(roomId).size() < 4){
-            return false;
-        }
-        System.out.println(roomMap.getNicknames(roomId));
+    // GameDTO 생성 후 GameMap<String roomId, GameDTO gameDTO>에 연결
+    // roomMap의 key 삭제
+    @Transactional
+    public boolean gameStart(String roomId) {
+        if(roomMap.getNicknames(roomId).size() < 4) return false;
         gameMap.setNewGame(roomId);
         for(String player : roomMap.getNicknames(roomId)){
             gameMap.addPlayer(roomId, player);
         }
 
-        gameMap.getGame(roomId).initGame(START_MONEY);
+        gameMap.initGame(roomId, START_MONEY);
+        roomMap.removeChatRoomDTO(roomId);
 
-        if(gameMap.getGame(roomId) != null){
-            roomMap.removeChatRoomDTO(roomId);
-        }
         return true;
     }
     public List<Player> getNextJobs(String roomId){
-        String[][] jobs = new String[gameMap.getGame(roomId).getPlayerListSize()][2];
-        gameMap.getGame(roomId).setCurrJobs(new ArrayList<>());
+        gameMap.setCurrJobs(roomId, new HashSet<>());
         List<Player> tempList = new ArrayList<>();
-//        tempList.addAll(gameMap.getGame(roomId).initJobs(initJobs(jobs)));
-        for(Player player : gameMap.getGame(roomId).initJobs(initJobs(jobs))){
+        for(Player player : gameMap.getGame(roomId).initJobs(initJobs(gameMap.getPlayerListSize(roomId)))){
             Player currPlayer = new Player(player.getNickName());
             currPlayer.setJobs(player.getJobs());
             tempList.add(currPlayer);
@@ -55,8 +49,9 @@ public class GameService {
     // 모든 플레이어에게 능력을 두 개씩 부여하는 메서드
     // 규칙 1. 한 플레이어에게 동일한 능력 두 개를 줄 수 없음
     // 규칙 2. 완전히 겹치는 플레이어가 생길 수 있음
-    // 규칙 3. 한 능력을 플레이어 수 (4, 5, 6) 당 (3, 3, 4) 개 초과하여 가질 수 없다.
-    private String[][] initJobs(String[][] jobs) {
+    // 규칙 3. 한 능력을 플레이어 수 (4, 5, 6) 당 (3, 3, 4) 개 초과하여 가질 수 없음
+    private String[][] initJobs(int playerSize) {
+        String[][] jobs = new String[playerSize][2];
         Random random = new Random();
         outer : while (true){
             int[] jobArray = new int[6]; // {0, 0, 0, 0, 0, 0}
@@ -69,7 +64,7 @@ public class GameService {
                 }
                 jobArray[first]++;
                 jobArray[second]++;
-                System.out.println(i+1 + "번째 플레이어 : " + jobNames[first] + ", " + jobNames[second]);
+//                System.out.println(i+1 + "번째 플레이어 : " + jobNames[first] + ", " + jobNames[second]);
                 jobs[i][0] = jobNames[first];
                 jobs[i][1] = jobNames[second];
             }
@@ -84,30 +79,8 @@ public class GameService {
         return jobs;
     }
 
-    public GameDTO getGame(String roomId) {
+    public Game getGame(String roomId) {
         return gameMap.getGame(roomId);
-    }
-
-    // 첫 라운드 첫 턴에만 랜덤으로 Player 리스트를 반환
-    // 이후에는 플레이어 돈의 내림차순으로 반환
-    // -> 순위 발표 및 다음 라운드 순서 결정 시 활용
-    public List<Player> initOrderWithMoney(String roomId) {
-        int round = gameMap.getGame(roomId).getRound();
-        int turn = gameMap.getGame(roomId).getTurn();
-        List<Player> order = new ArrayList<>();
-
-        order.addAll(gameMap.getGame(roomId).getPlayerList());
-//        for(Player player : gameMap.getGame(roomId).getPlayerList()){
-//            order.add(player);
-//        }
-        if(round==1 && turn==1){
-            Collections.shuffle(order);
-        }else{
-            Collections.sort(order);
-        }
-        gameMap.getGame(roomId).setOrder(order);
-        return order;
-
     }
 
     public List<String> initOrder(String roomId) {
@@ -118,23 +91,51 @@ public class GameService {
         return rankList;
     }
 
-    public DealDTO initDeal(String roomId){
-        GameDTO game = gameMap.getGame(roomId);
+    // 첫 라운드 첫 턴에만 랜덤으로 Player 리스트를 반환
+    // 이후에는 플레이어 돈의 내림차순으로 반환
+    // -> 순위 발표 및 다음 라운드 순서 결정 시 활용
+    public List<Player> initOrderWithMoney(String roomId) {
+        Game game = gameMap.getGame(roomId);
         List<Player> playerList = game.getPlayerList();
-        List<String> currJobs = game.getCurrJobs();
+        int round = game.getRound();
+        int turn = game.getTurn();
+        List<Player> order = new ArrayList<>();
+
+        order.addAll(playerList);
+        if(round==1 && turn==1){
+            Collections.shuffle(order);
+        }else{
+            Collections.sort(order);
+        }
+        game.setOrder(order);
+        return order;
+
+    }
+
+    public Player getCurrBroker(String roomId) {
+        Game game = gameMap.getGame(roomId);
+        return new Player(game.getOrder().get(game.getTurn()-1).getNickName());
+    }
+
+    public DealDTO initDeal(String roomId){
+        Game game = gameMap.getGame(roomId);
+        List<Player> playerList = game.getPlayerList();
+        Set<String> currJobs = game.getCurrJobs();
         Player broker = game.getOrder().get(game.getTurn()-1);
         System.out.println("currJobs : " + currJobs);
         Random random = new Random();
         int n = game.getPlayerListSize();
 
-        int ranInt = Math.min(currJobs.size(), MIN_DEAL_PLAYERS[n-4] + random.nextInt(MAX_DEAL_PLAYERS[n-4]-MIN_DEAL_PLAYERS[n-4]+1));
+        int ranInt = Math.min(currJobs.size(), MIN_DEAL_PLAYERS[n-4]
+                + random.nextInt(MAX_DEAL_PLAYERS[n-4]-MIN_DEAL_PLAYERS[n-4]+1));
 
         List<String> chosenJobs = choiceJobs(broker, ranInt, currJobs);
-        System.out.println(ranInt + ", chosenJobs : " + chosenJobs); // -ㅇ
+        System.out.println(ranInt + ", chosenJobs : " + chosenJobs);
 
         int count = Math.max(2, countPlayer(broker, playerList, chosenJobs));
         DealDTO deal = new DealDTO(count, chosenJobs);
-        deal.setDealMoney(MIN_DEAL_MONEY[game.getRound()-1] + random.nextInt(11)*100 + (count>3?300:(count>2?200:0))); //인원별 보너스
+        deal.setDealMoney(MIN_DEAL_MONEY[game.getRound()-1]
+                + random.nextInt(11)*100 + (count>3?300:(count>2?200:0))); //인원별 보너스
         game.setDeal(deal);
         System.out.println(deal);
         return deal;
@@ -181,10 +182,10 @@ public class GameService {
     }
 
     //랜덤 뽑기
-    public List<String> choiceJobs(Player broker, int n, List<String> currJobs){
+    public List<String> choiceJobs(Player broker, int n, Set<String> currJobs){
         List<String> retList = new ArrayList<>();
         List<String> tempList = new ArrayList<>();
-        tempList.addAll(currJobs); // 깊은 복사인지 확인 필요
+        tempList.addAll(currJobs);
         Random random = new Random();
         String brokerJob = broker.getJobs()[random.nextInt(2)];
         tempList.remove(brokerJob);
@@ -219,7 +220,7 @@ public class GameService {
 
 
     public void updatePlayerMoney(String roomId) {
-        GameDTO game = gameMap.getGame(roomId);
+        Game game = gameMap.getGame(roomId);
         Map<String, Integer> dealAmount = game.getDealAmount();
         for(Player player : game.getPlayerList()){
             if(dealAmount.containsKey(player.getNickName())){
@@ -229,12 +230,12 @@ public class GameService {
     }
 
     public int[][][] getLog(String roomId) {
-        GameDTO game = gameMap.getGame(roomId);
+        Game game = gameMap.getGame(roomId);
         return game.getGameLog();
     }
 
     public List<String> getNicknames(String roomId) {
-        GameDTO game = gameMap.getGame(roomId);
+        Game game = gameMap.getGame(roomId);
         List<String> nicknameList = new ArrayList<>();
         for(Player player : game.getPlayerList()){
             nicknameList.add(player.getNickName());
@@ -243,7 +244,7 @@ public class GameService {
     }
 
     public void updateGameLog(String roomId) {
-        GameDTO game = gameMap.getGame(roomId);
+        Game game = gameMap.getGame(roomId);
 
         for(int i = 0; i < game.getPlayerListSize(); i++){
             Player player = game.getPlayerList().get(i);
@@ -255,7 +256,7 @@ public class GameService {
     }
 
     public List<String> getProGangPlayer(String roomId) {
-        GameDTO game = gameMap.getGame(roomId);
+        Game game = gameMap.getGame(roomId);
         int max = 0;
         List<String> proGangList = new ArrayList<>();
         for(Player player : game.getPlayerList()){
@@ -271,7 +272,7 @@ public class GameService {
     }
 
     public List<Player> getWinners(String roomId) {
-        GameDTO game = gameMap.getGame(roomId);
+        Game game = gameMap.getGame(roomId);
         List<Player> winnerList = new ArrayList<>();
         int max = 0;
         for(Player player : game.getPlayerList()){
@@ -284,10 +285,5 @@ public class GameService {
             }
         }
         return winnerList;
-    }
-
-    public Player getCurrBroker(String roomId) {
-        GameDTO game = gameMap.getGame(roomId);
-        return new Player(game.getOrder().get(game.getTurn()-1).getNickName());
     }
 }

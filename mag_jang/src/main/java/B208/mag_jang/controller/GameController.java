@@ -2,7 +2,6 @@ package B208.mag_jang.controller;
 
 import B208.mag_jang.domain.ChatMessageDTO;
 import B208.mag_jang.domain.DealDTO;
-import B208.mag_jang.domain.GameDTO;
 import B208.mag_jang.domain.Player;
 import B208.mag_jang.service.AsyncService;
 import B208.mag_jang.service.GameService;
@@ -25,15 +24,15 @@ public class GameController {
     private final UserService userService;
     private final AsyncService asyncService;
 
-    // game시작 시에 room에 있는 유저아이디를 game으로 넘겨주며 roommap 삭제 - ㅇ
-    // 프론트 : 메서드 만들어서 처리 "/sub/game/start/{roomId}"
+    // game시작 시 room에 있는 유저아이디를 game으로 넘겨주며 roommap 삭제
+    // 프론트 : "/sub/game/start/{roomId}" 구독
     @MessageMapping(value = "/start")
     public void gameStart(ChatMessageDTO message) throws InterruptedException {
 
-        if(gameService.gameStart(message.getWriter(), message.getRoomId())){
+        if(gameService.gameStart(message.getRoomId())){
             // 1. 게임시작 메세지 전송
             System.out.println("gameStart : 게임을 시작합니다!");
-            template.convertAndSend("/sub/game/start/" + message.getRoomId(), gameService.getGame(message.getRoomId())); // GameDTO 전송
+            template.convertAndSend("/sub/game/start/" + message.getRoomId(), gameService.getGame(message.getRoomId())); // GameDTO 만들어 전송하기
 
 
             // 2. 3초 후 능력 생성
@@ -57,7 +56,7 @@ public class GameController {
     }
 
     // 플레이어 능력 생성 후 반환
-    // 프론트 : 메서드 만들어서 처리 "/sub/game/jobs/{roomId}"
+    // 프론트 : "/sub/game/jobs/{roomId}" 구독
     public void initJobs(String roomId) throws InterruptedException {
         System.out.println("initJobs : "+roomId);
         template.convertAndSend("/sub/game/jobs/" + roomId, gameService.getNextJobs(roomId)); // 플레이어별 능력 리스트 전송
@@ -110,10 +109,7 @@ public class GameController {
             System.out.println("callback!! : " + result);
             //3초 기다렸다가 딜 생성
             System.out.println("initDeal : "+roomId);
-            DealDTO deal = new DealDTO();
-            deal = gameService.initDeal(roomId);
-            System.out.println(deal);
-            System.out.println("/sub/game/deal/" + roomId);
+            DealDTO deal = gameService.initDeal(roomId);
             template.convertAndSend("/sub/game/deal/" + roomId, deal);
         }, (e) -> {
             System.out.println("error");
@@ -221,32 +217,9 @@ public class GameController {
 //        for(String nickname : proGangPlayerList){
 //            userService.setProGangAmount(nickname);
 //        }
-
-
-    }
-    // 게임 시작 : 게임 기본 정보를 반환 -initGame을 해서 반환 but 딱히 init할 일이 없다    - ㅇ
-    // 3초 뒤, 플레이어 능력을 반환 -initJobs, 세 라운드 동안 출력해야 함              - ㅇ
-    // 3초 뒤, 순서를 반환(프론트에서는 채팅창에 이를 출력)                             - ㅇ
-    
-    // 1라운드 1턴의 현재 브로커 및 거래 조건을 생성하여 반환 x 사람 수 x 라운드 수 - ㅇ
-    // 프론트에 타이머가 구현되어 있으니까 백에서는 쓰레드를 쓰지 않고 요청만 받기 - ㅇ
-    // -> 브로커가 거래 조건을 만족시켜서 요청을 보내거나, 혹은 시간이 초과되었다는 요청을 보냄 - ㅇ
-    // 백에서 해당 요청을 받아 결과를 메세지로 전송 - ㅇ
-    // 각 플레이어의 프론트에서 출력, 투표 UI 및 타이머 시작 -> 백에서는 투표 결과를 동기로 기다림 - ㅇ
-    // 모든 플레이어가 투표를 완료하거나 시간이 초과되면 요청 - ㅇ
-    // 시간이 초과되면 투표 거절로 인식하여 최종 결과를 전송 - ㅇ
-    // 턴++ - ㅇ
-    // 턴이 사람 수 만큼 진행된다면 라운드 ++ 및 턴 = 1, 순위 반환 - ㅇ
-    // 이후부터는 2번째 줄부터 다시 진행 - ㅇ
-    // ...
-    // 마지막 라운드의 마지막 턴이 끝나면 최종 순위 반환 - ㅇ
-    // 이때 각 플레이어별 점수, 업적 등의 정보를 DB에서 최신화하여 전송
-    
-    
-    // + 네이버 로그인 합치기
-    // + 게임 종료 or 다시 시작 -> 게임 종료 시 gameMap에서 gameDTO 삭제, roomMap에 room 생성(게임 준비 상태로)
-
-    // 상위 랭킹 확인, 유저 정보 반환 부분
+          // 상위 랭킹 확인, 유저 정보 반환 부분
 //        System.out.println(userService.getRank());
 //        System.out.println(userService.getUser("김주호"));
+
+    }
 }

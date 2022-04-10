@@ -4,15 +4,16 @@ package B208.mag_jang.domain;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Component
 public class GameMap {
-    private Map<String, GameDTO> games = new HashMap<>();
+
+    private Map<String, Game> games = new HashMap<>();
 
     public void addPlayer(String roomId, String nickname) {
-        games.get(roomId).addPlayer(nickname);
+        this.games.get(roomId).addPlayer(nickname);
     }
 
     public void removeNickname(String roomId, String writer) {
@@ -21,12 +22,19 @@ public class GameMap {
             return;
         }
     }
-    public GameDTO getGame(String roomId){
+    public Game getGame(String roomId){
         return games.get(roomId);
     }
 
     public void setNewGame(String roomId){
-        games.put(roomId, new GameDTO(roomId));
+        games.put(roomId, new Game(roomId));
     }
 
+    public void initGame(String roomId, int startMoney) {
+        games.get(roomId).initGame(startMoney);
+    }
+
+    public int getPlayerListSize(String roomId) { return games.get(roomId).getPlayerListSize(); }
+
+    public void setCurrJobs(String roomId, Set<String> jobs) { games.get(roomId).setCurrJobs(jobs); }
 }

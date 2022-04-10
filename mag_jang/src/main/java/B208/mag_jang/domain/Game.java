@@ -3,12 +3,13 @@ package B208.mag_jang.domain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-public class GameDTO {
+public class Game {
     private String gameId;
     private List<Player> playerList; // 플레이어 리스트
-    private List<Player> order; // 플레이어 리스트
-    private List<String> currJobs; // 플레이어 리스트
+    private List<Player> order; // 브로커 순서 리스트
+    private Set<String> currJobs; // 현재 능력 Set
     //직업리스트도 있어야됨
     private DealDTO deal;
 
@@ -19,7 +20,7 @@ public class GameDTO {
     private boolean isGameFinished = false;
 
     //게임 초기 생성
-    public GameDTO(String roomId) {
+    public Game(String roomId) {
         this.gameId = roomId;
         this.playerList = new ArrayList<Player>();
         this.round = 1;
@@ -52,29 +53,23 @@ public class GameDTO {
         return deal.isDealOk();
     }
     //거래분배금액반환
-    public Map<String,Integer> getDealAmount(){
-        return deal.getDealAmount();
-    }
+    public Map<String,Integer> getDealAmount(){ return deal.getDealAmount(); }
 
     public void addPlayer(String player) {
         playerList.add(new Player(player));
     }
 
-    public void initGame(int seedMoney) {
-        for(int i=0; i<getPlayerListSize(); i++){
-            playerList.get(i).setMoney(seedMoney);
+    public void initGame(int startMoney) {
+        for(int i=0; i<playerList.size(); i++){
+            playerList.get(i).setMoney(startMoney);
         }
-        gameLog = new int[3][getPlayerListSize()][getPlayerListSize()];
+        gameLog = new int[3][playerList.size()][playerList.size()];
     }
     public List<Player> initJobs(String[][] jobs){
         for(int i=0; i<playerList.size(); i++){
             playerList.get(i).setJobs(jobs[i]);
-            if(!currJobs.contains(jobs[i][0])){
-                currJobs.add(jobs[i][0]);
-            }
-            if(!currJobs.contains(jobs[i][1])){
-                currJobs.add(jobs[i][1]);
-            }
+            currJobs.add(jobs[i][0]);
+            currJobs.add(jobs[i][1]);
         }
         return playerList;
     }
@@ -127,13 +122,9 @@ public class GameDTO {
         this.order = order;
     }
 
-    public List<String> getCurrJobs() {
-        return currJobs;
-    }
+    public Set<String> getCurrJobs() { return currJobs; }
 
-    public void setCurrJobs(List<String> currJobs) {
-        this.currJobs = currJobs;
-    }
+    public void setCurrJobs(Set<String> currJobs) { this.currJobs = currJobs; }
 
     public void nextTurn() {
         this.turn++;

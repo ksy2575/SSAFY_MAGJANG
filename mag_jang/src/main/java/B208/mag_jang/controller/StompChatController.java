@@ -1,8 +1,6 @@
 package B208.mag_jang.controller;
 
 import B208.mag_jang.domain.ChatMessageDTO;
-import B208.mag_jang.domain.ChatRoomDTO;
-import B208.mag_jang.domain.GameDTO;
 import B208.mag_jang.domain.RoomMap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +10,6 @@ import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor

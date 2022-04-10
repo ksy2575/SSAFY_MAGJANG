@@ -27,6 +27,7 @@ dependencies {
 
 
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+	implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.26'
 	implementation 'org.json:json:20190722'
 }
 
