@@ -123,13 +123,13 @@ public class GameController {
     // 요거 조금만 응용하면 한 명 한 명 클릭 보이게 할 수 있음 : 플레이어 클릭 시 메세지 + 금액 넣고 버튼 클릭 시 메세지
 
     @MessageMapping(value = "/choice")
-    public void dealMemberChoice(ChatMessageDTO message) throws InterruptedException {
+    public void dealMemberChoice(ChatMessageDTO message) {
         String member = (String) message.getMessage();
         System.out.println("dealMemberChoice : 거래 멤버 선택 " + member);
         template.convertAndSend("/sub/game/choice/" + message.getRoomId(), member); // 선택된 멤버 전송
     }
 
-    @MessageMapping(value = "/finalchoice")
+    @MessageMapping(value = "/finalchoice") // 현재 : [["player1", 300], ["player2", 200] ,,,] -> JSON 객체 구조로 바꾸기
     public void dealMemberChoiceComplete(ChatMessageDTO message) throws InterruptedException {
         System.out.println(message.getMessage());
         if(message.getMessage().equals("") || message.getMessage() == null){
@@ -141,34 +141,29 @@ public class GameController {
             //컨트롤러 메서드 만들기
             startNext(message.getRoomId());
         }else{
-        List<ArrayList<Object>> moneys = (ArrayList<ArrayList<Object>>)message.getMessage(); // [["player1", 300], ["player2", 200] ,,,]
-        gameService.setDealAmount(message.getRoomId(), moneys);
-        DealDTO deal = gameService.getGame(message.getRoomId()).getDeal();
-        System.out.println("dealMemberChoice : 분배금 확인 " + deal);
-        template.convertAndSend("/sub/game/finalchoice/" + message.getRoomId(), deal); // {멤버 : 돈} 전송
+            List<ArrayList<Object>> moneys = (ArrayList<ArrayList<Object>>)message.getMessage(); // [["player1", 300], ["player2", 200] ,,,]
+            gameService.setDealAmount(message.getRoomId(), moneys);
+            DealDTO deal = gameService.getDeal(message.getRoomId());
+            System.out.println("dealMemberChoice : 분배금 확인 " + deal);
+            template.convertAndSend("/sub/game/finalchoice/" + message.getRoomId(), deal); // DealDTO 전송 -> {멤버 : 돈} 만 보내도록 수정 필요
         }
     }
 
     @MessageMapping(value = "/vote")
     public void vote(ChatMessageDTO message) throws InterruptedException {
         System.out.println(message.getWriter() + " 투표 : " + (boolean)message.getMessage());
-        DealDTO deal = gameService.getGame(message.getRoomId()).getDeal();
+        DealDTO deal = gameService.getDeal(message.getRoomId());
         deal.addVote(message.getWriter(), (boolean)message.getMessage());
 
         //깽판 횟수 ++
-        if(!(boolean)message.getMessage()){
-            for(Player player : gameService.getGame(message.getRoomId()).getPlayerList()){
-                if(player.getNickName().equals(message.getWriter())){
-                    player.setGangAmount(player.getGangAmount()+1);
-                }
-            }
-        }
+        if(!(boolean)message.getMessage()) gameService.setGangAmount(message.getRoomId(), message.getWriter());
+
 
         List<String> player = new ArrayList<>();
         player.add(message.getWriter());
-        template.convertAndSend("/sub/game/vote/" + message.getRoomId(), player); // 이 사람이 투표 완료했어요! - ㅇ
+        template.convertAndSend("/sub/game/vote/" + message.getRoomId(), player); // 투표 완료 메시지 전송
 
-        if(deal.isVoteOK()){
+        if(deal.isVoteOK()){ // dto가 메서드를 갖고 있는 형태 -> Deal을 dto로 하는게 맞는지 고민 필요
             deal.calcMoney(gameService.getGame(message.getRoomId()).getRound());
             template.convertAndSend("/sub/game/finalvote/" + message.getRoomId(), deal); // {멤버 : 돈} 전송, 이를 파싱하여 자신의 돈 추적 - ㅇ
 

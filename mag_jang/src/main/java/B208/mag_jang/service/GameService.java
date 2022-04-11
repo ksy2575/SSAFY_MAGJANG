@@ -83,6 +83,11 @@ public class GameService {
         return gameMap.getGame(roomId);
     }
 
+    public DealDTO getDeal(String roomId) {
+        Game game = gameMap.getGame(roomId);
+        return game.getDeal();
+    }
+
     public List<String> initOrder(String roomId) {
         List<String> rankList = new ArrayList<>();
         for(Player player : initOrderWithMoney(roomId)){
@@ -204,11 +209,12 @@ public class GameService {
     }
 
     public void setDealAmount(String roomId, List<ArrayList<Object>> moneys) {
+        Game game = gameMap.getGame(roomId);
         Map<String, Integer> moneyMap = new HashMap<>();
         for(ArrayList<Object> money : moneys){
             moneyMap.put((String)money.get(0), (Integer)money.get(1));
         }
-        gameMap.getGame(roomId).getDeal().setDealAmount(moneyMap);
+        game.getDeal().setDealAmount(moneyMap);
     }
 
     public void startNext(String roomId) {
@@ -285,5 +291,14 @@ public class GameService {
             }
         }
         return winnerList;
+    }
+
+    public void setGangAmount(String roomId, String writer) {
+        Game game = gameMap.getGame(roomId);
+        for(Player player : game.getPlayerList()){
+            if(player.getNickName().equals(writer)){
+                player.setGangAmount(player.getGangAmount()+1);
+            }
+        }
     }
 }
